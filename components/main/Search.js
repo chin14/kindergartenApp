@@ -1,8 +1,8 @@
 import React, { useState } from 'react'
 import { View, Text, TextInput, FlatList, TouchableOpacity } from 'react-native'
 
-import firebase from 'firebase';
-require('firebase/firestore');
+import firebase from 'firebase/app';
+import 'firebase/firestore'
 
 export default function Search(props) {
     const [users, setUsers] = useState([])

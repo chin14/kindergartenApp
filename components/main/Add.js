@@ -46,7 +46,7 @@ export default function Add({ navigation }) {
     }
   };
 
-  if (hasCameraPermission === null || hasGalleryPermission === null) {
+  if (hasCameraPermission === null || hasGalleryPermission === false) {
     return <View />;
   }
   if (hasCameraPermission === false || hasGalleryPermission === false) {

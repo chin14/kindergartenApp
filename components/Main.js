@@ -4,7 +4,7 @@ import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityI
 import { connect } from 'react-redux'
 import { bindActionCreators } from 'redux'
 import { fetchUser, fetchUserPosts, fetchUserFollowing, clearData } from '../redux/actions/index'
-import firebase from 'firebase';
+import firebase from 'firebase/app';
 
 import FeedScreen from './main/Feed';
 import ProfileScreen from './main/Profile';
@@ -12,7 +12,7 @@ import SearchScreen from './main/Search';
 import CalenderScreen from './main/Calender';
 
 
-
+//Material 
 
 const Tab = createMaterialBottomTabNavigator();
 
@@ -23,28 +23,34 @@ const EmptyScreen = () =>{
 export class Main extends Component {
     componentDidMount(){
         this.props.fetchUser();
+        this.props.clearData();
         this.props.fetchUserPosts();
+        this.props.fetchUserFollowing();
+
     }
     render() {
         return (
             <Tab.Navigator initialRouteName="Feed" labeled={false}>
-            <Tab.Screen name="Feed" component={FeedScreen} options={{ 
-                headerShown: false,
+            <Tab.Screen name="Feed" component={FeedScreen} 
+                screenOptions={{
+                    tabBarStyle: { backgroundColor: 'purple' },
+                  }}
+                options={{ 
                 tabBarIcon: ({ color, size}) =>(
                     <MaterialCommunityIcons name="home" color={ color } size={ 26 }></MaterialCommunityIcons>
                 )
                 }} />
                    <Tab.Screen name="Search" component={SearchScreen} navigation={this.props.navigation} 
                    options={{ 
-                tabBarIcon: ({ color, size}) =>(
-                    <MaterialCommunityIcons name="magnify" color={ color } size={ 26 }></MaterialCommunityIcons>
+                        tabBarIcon: ({ color, size}) =>(
+                        <MaterialCommunityIcons name="magnify" color={ color } size= { 26 }></MaterialCommunityIcons>
                 )
                 }} />
                 <Tab.Screen name="AddContainer" component={EmptyScreen} 
-                listeners={({ navigation }) =>({
-                    tabPress: event => {
-                        event.preventDefault();
-                        navigation.navigate("Add")
+                    listeners={({ navigation }) =>({
+                        tabPress: event => {
+                            event.preventDefault();
+                            navigation.navigate("Add")
                     }
                 })}
                 options={{ 
@@ -64,7 +70,6 @@ export class Main extends Component {
                 )
                 }} />
                 <Tab.Screen name="Calender" component={CalenderScreen} options={{ 
-                headerShown: false,
                 tabBarIcon: ({ color, size}) =>(
                     <MaterialCommunityIcons name="calendar-check" color={ color } size={ 26 }></MaterialCommunityIcons>
                 )
@@ -74,7 +79,7 @@ export class Main extends Component {
         )
     }
 }
-const mapDispatchProps = (dispatch) => bindActionCreators({fetchUser, fetchUserPosts}, dispatch)
+const mapDispatchProps = (dispatch) => bindActionCreators({fetchUser, fetchUserPosts, fetchUserFollowing, clearData}, dispatch)
 
 
 export default connect(null,mapDispatchProps)(Main);

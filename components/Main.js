@@ -1,4 +1,4 @@
-import React, { Component } from 'react'
+import React, { useEffect } from 'react'
 import { createMaterialBottomTabNavigator } from '@react-navigation/material-bottom-tabs';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons'
 import { connect } from 'react-redux'
@@ -20,16 +20,16 @@ const EmptyScreen = () =>{
     return(null)
 }
 
-export class Main extends Component {
-    componentDidMount(){
-        this.props.fetchUser();
-        this.props.clearData();
-        this.props.fetchUserPosts();
-        this.props.fetchUserFollowing();
+const  Main = (props) => {
 
-    }
-    render() {
-        return (
+    useEffect(() => {
+        props.fetchUser();
+        props.clearData();
+        props.fetchUserPosts();
+        props.fetchUserFollowing();
+    }, [])
+
+    return (
             <Tab.Navigator initialRouteName="Feed" labeled={false}>
             <Tab.Screen name="Feed" component={FeedScreen} 
                 screenOptions={{
@@ -78,7 +78,7 @@ export class Main extends Component {
           </Tab.Navigator>  
         )
     }
-}
+
 const mapDispatchProps = (dispatch) => bindActionCreators({fetchUser, fetchUserPosts, fetchUserFollowing, clearData}, dispatch)
 
 

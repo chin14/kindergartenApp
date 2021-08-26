@@ -1,5 +1,5 @@
 import { StatusBar } from 'expo-status-bar';
-import React, { Component } from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text } from 'react-native';
 
 import  firebase from 'firebase/app';
@@ -44,32 +44,23 @@ import SaveScreen from './components/main/Save';
 
 const Stack = createStackNavigator();
 
+const Appf = ({props}) => {
+    const [loggedIn, setLoggedIn] = useState(false);
+    const [loaded, setLoaded] = useState(false);
 
-export class App extends Component {
-  constructor(props){
-    super();
-    this.state = {
-      loaded: false,
+    useEffect(() => {
+      firebase.auth().onAuthStateChanged((user) =>{
+        if(!user){
+          setLoggedIn(false)
+        }else{
+          setLoggedIn(true)
+        }
+        // setLoggedIn(user !==)
+        setLoaded(true)
+      })
+    }, [])
 
-    }
-  }
-  componentDidMount(){
-    firebase.auth().onAuthStateChanged((user) =>{
-      if(!user){
-        this.setState({
-          loggedIn: false,
-          loaded: true,
-        })
-      }else{
-        this.setState({
-          loggedIn: true,
-          loaded: true,
-        })
-      }
-    })
-  }
-  render() {
-    const { loggedIn, loaded } = this.state;
+    return () => {
     if(!loaded){
       return(
         <View style={{ flex: 1, justifyContent: 'center'}}>
@@ -100,10 +91,67 @@ export class App extends Component {
     </Provider>
     
   )
+    }
 }
-}
+// export class App extends Component {
+//   constructor(props){
+//     super();
+//     this.state = {
+//       loaded: false,
 
-export default App
+//     }
+//   }
+//   componentDidMount(){
+//     firebase.auth().onAuthStateChanged((user) =>{
+//       if(!user){
+//         this.setState({
+//           loggedIn: false,
+//           loaded: true,
+//         })
+//       }else{
+//         this.setState({
+//           loggedIn: true,
+//           loaded: true,
+//         })
+//       }
+//     })
+//   }
+//   render() {
+//     const { loggedIn, loaded } = this.state;
+//     if(!loaded){
+//       return(
+//         <View style={{ flex: 1, justifyContent: 'center'}}>
+//           <Text>Loading</Text>
+//         </View>
+//       )
+//     }
+//     if(!loggedIn){
+//     return (
+//       <NavigationContainer>
+//         <Stack.Navigator initalRouteName="Landing">
+//           <Stack.Screen name="Landing" component={ LandingScreen } options={{ headerShown: false}}/>
+//           <Stack.Screen name="Register" component={ RegisterScreen } />
+//           <Stack.Screen name="Login" component={ LoginScreen } />
+//         </Stack.Navigator>
+//       </NavigationContainer>
+//     );
+//   }
+//   return(
+//     <Provider store={store}>
+//      <NavigationContainer>
+//       <Stack.Navigator initalRouteName="Main">
+//           <Stack.Screen name="Main" component={ MainScreen } />
+//           <Stack.Screen name="Add" component={ AddScreen } navigation={this.props.navigation} />
+//           <Stack.Screen name="Save" component={ SaveScreen } navigation={this.props.navigation} />
+//         </Stack.Navigator>
+//       </NavigationContainer>
+//     </Provider>
+    
+//   )
+// }
+// }
+
+export default Appf
 
  
 

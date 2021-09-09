@@ -6,7 +6,7 @@ import  firebase from 'firebase/app';
 import 'firebase/app';
 import 'firebase/firestore';
 import 'firebase/auth';
-
+import firebaseApp from './firebase'
 import { Provider } from 'react-redux';
 import { createStore, applyMiddleware } from 'redux';
 import rootReducer from './redux/reducers';
@@ -14,15 +14,6 @@ import thunk from 'redux-thunk';
 
 const store = createStore(rootReducer, applyMiddleware(thunk))
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
-const firebaseConfig = {
-  apiKey: "AIzaSyCWBoXMBBGlvmpMXahOHKI5X4iGkbsv-XU",
-  authDomain: "app-19980.firebaseapp.com",
-  projectId: "app-19980",
-  storageBucket: "app-19980.appspot.com",
-  messagingSenderId: "895902977631",
-  appId: "1:895902977631:web:ac9adccb29baa81d9455ea",
-  measurementId: "G-7KFFCR4J8Z"
-};
 
 
 if(firebase.apps.length === 0){
@@ -38,13 +29,13 @@ import MainScreen from './components/Main'
 import LoginScreen from './components/auth/Login'
 import AddScreen from './components/main/Add';
 import SaveScreen from './components/main/Save';
-
+import { Button } from '@material-ui/core';
 
 
 
 const Stack = createStackNavigator();
 
-const Appf = ({props}) => {
+const Appf = ({navigation}) => {
     const [loggedIn, setLoggedIn] = useState(false);
     const [loaded, setLoaded] = useState(false);
 
@@ -60,7 +51,8 @@ const Appf = ({props}) => {
       })
     }, [])
 
-    return () => {
+   
+   
     if(!loaded){
       return(
         <View style={{ flex: 1, justifyContent: 'center'}}>
@@ -72,9 +64,27 @@ const Appf = ({props}) => {
     return (
       <NavigationContainer>
         <Stack.Navigator initalRouteName="Landing">
-          <Stack.Screen name="Landing" component={ LandingScreen } options={{ headerShown: false}}/>
-          <Stack.Screen name="Register" component={ RegisterScreen } />
-          <Stack.Screen name="Login" component={ LoginScreen } />
+          <Stack.Screen 
+          name="Landing" 
+          component={ LandingScreen } 
+          options={{ headerShown: false}}/>
+          <Stack.Screen 
+          name="Register" 
+          component={ RegisterScreen } 
+          options={{  headerStyle: {
+            backgroundColor: '#F4D1BB',
+            
+          }
+          }} />
+          <Stack.Screen 
+          name="Login" 
+          component={ LoginScreen }
+          options={{  headerStyle: {
+            backgroundColor: '#F4D1BB',
+            
+          }
+          }}
+           />
         </Stack.Navigator>
       </NavigationContainer>
     );
@@ -82,16 +92,25 @@ const Appf = ({props}) => {
   return(
     <Provider store={store}>
      <NavigationContainer>
-      <Stack.Navigator initalRouteName="Main">
-          <Stack.Screen name="Main" component={ MainScreen } />
-          <Stack.Screen name="Add" component={ AddScreen } navigation={this.props.navigation} />
-          <Stack.Screen name="Save" component={ SaveScreen } navigation={this.props.navigation} />
+      <Stack.Navigator initalRouteName="Main" >
+          <Stack.Screen name="Kindergarten" component={ MainScreen } options={{  headerStyle: {
+            backgroundColor: '#F4D1BB', 
+          },
+          headerRight: () => (
+            <Button
+              label="Info"
+              color="#fff"
+            >Info</Button>
+          ),
+          }}/>
+          <Stack.Screen name="Add" component={ AddScreen } navigation={navigation} />
+          <Stack.Screen name="Save" component={ SaveScreen } navigation={navigation} />
         </Stack.Navigator>
       </NavigationContainer>
     </Provider>
     
   )
-    }
+    
 }
 // export class App extends Component {
 //   constructor(props){

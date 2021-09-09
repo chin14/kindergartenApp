@@ -34,7 +34,7 @@ export default function Landing({ navigation }) {
 const styles = StyleSheet.create({
     root: {
             flex: 1,
-            backgroundColor: '#f5deb3',
+            backgroundColor: '#F4D1BB',
             
         },
     image: {

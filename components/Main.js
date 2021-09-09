@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import { createMaterialBottomTabNavigator } from '@react-navigation/material-bottom-tabs';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons'
 import { connect } from 'react-redux'
@@ -10,10 +10,26 @@ import FeedScreen from './main/Feed';
 import ProfileScreen from './main/Profile';
 import SearchScreen from './main/Search';
 import CalenderScreen from './main/Calender';
+import ChatScreen from '../Chat /Chat';
 
 
-//Material 
 
+//Material UI 
+
+import { makeStyles } from '@material-ui/core/styles';
+import BottomNavigation from '@material-ui/core/BottomNavigation';
+import BottomNavigationAction from '@material-ui/core/BottomNavigationAction';
+import PersonOutlineOutlinedIcon from '@material-ui/icons/PersonOutlineOutlined';
+import HomeOutlinedIcon from '@material-ui/icons/HomeOutlined';
+import DateRangeOutlinedIcon from '@material-ui/icons/DateRangeOutlined';
+
+const useStyles = makeStyles({
+    root:{
+    
+        backgroundColor: "#C7BAA6"
+
+    }
+})
 const Tab = createMaterialBottomTabNavigator();
 
 const EmptyScreen = () =>{
@@ -21,6 +37,9 @@ const EmptyScreen = () =>{
 }
 
 const  Main = (props) => {
+    const classes = useStyles()
+
+    const [value, setValue] = React.useState(0)
 
     useEffect(() => {
         props.fetchUser();
@@ -30,17 +49,16 @@ const  Main = (props) => {
     }, [])
 
     return (
+       
             <Tab.Navigator initialRouteName="Feed" labeled={false}>
             <Tab.Screen name="Feed" component={FeedScreen} 
-                screenOptions={{
-                    tabBarStyle: { backgroundColor: 'purple' },
-                  }}
                 options={{ 
                 tabBarIcon: ({ color, size}) =>(
                     <MaterialCommunityIcons name="home" color={ color } size={ 26 }></MaterialCommunityIcons>
-                )
+                ),
+
                 }} />
-                   <Tab.Screen name="Search" component={SearchScreen} navigation={this.props.navigation} 
+                   <Tab.Screen name="Search" component={SearchScreen} navigation={props.navigation} 
                    options={{ 
                         tabBarIcon: ({ color, size}) =>(
                         <MaterialCommunityIcons name="magnify" color={ color } size= { 26 }></MaterialCommunityIcons>
@@ -72,6 +90,11 @@ const  Main = (props) => {
                 <Tab.Screen name="Calender" component={CalenderScreen} options={{ 
                 tabBarIcon: ({ color, size}) =>(
                     <MaterialCommunityIcons name="calendar-check" color={ color } size={ 26 }></MaterialCommunityIcons>
+                )
+                }} />
+                 <Tab.Screen name="Chat" component={ChatScreen} options={{ 
+                tabBarIcon: ({ color, size}) =>(
+                    <MaterialCommunityIcons name="chat" color={ color } size={ 26 }></MaterialCommunityIcons>
                 )
                 }} />
             {/* <Tab.Screen name="Settings" component={SettingsScreen} /> */}

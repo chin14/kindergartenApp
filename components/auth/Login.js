@@ -1,9 +1,24 @@
 import React, { useState } from 'react'
-import {  Button, TextInput, View } from 'react-native'
+import {  TextInput, View, StyleSheet } from 'react-native'
 import firebase from 'firebase/app';
+import { Button} from '@material-ui/core';
+import { makeStyles } from '@material-ui/core/styles';
 
+
+
+const useStyles = makeStyles({
+    
+    btn:{
+        marginLeft: 13,
+        marginRight: 13,
+        backgroundColor: "green",
+        color: "white",
+        borderRadius: 30,
+    }
+})
 
 const Login = () =>{
+  const classes = useStyles();
   const[email, setEmail] = useState('');
   const[password, setPassword] = useState('');
 
@@ -18,22 +33,27 @@ const Login = () =>{
     })
 }
     return (
-        <View>
+        <View  style={styles.root}>
         
             <TextInput
+                style={styles.input}
                 placeholder="email"
-                onChangeText={(email) => setEmail({ email })}
+                onChangeText={(email) => setEmail( email )}
             />
             <TextInput
+                style={styles.input}
                 placeholder="password"
                 secureTextEntry={true}
-                onChangeText={(password) => setPassword({ password })}
+                onChangeText={(password) => setPassword( password )}
             />
 
             <Button
-                onPress={onSignUp}
-                title="Sing in"
-            />
+                onClick={onSignUp}
+                className={classes.btn}
+                size="medium"
+                variant="outlined"
+                
+            >On Sign In</Button>
         </View>
     )
   }
@@ -84,5 +104,24 @@ const Login = () =>{
 //         )
 //     }
 // }
+
+const styles = StyleSheet.create({
+    root: {
+        flex: 1,
+        backgroundColor: '#F4D1BB',
+       
+        
+    },
+    input: {
+        height: 40,
+        margin: 12,
+        borderWidth: 1,
+        padding: 10,
+        backgroundColor: "white",
+        borderRadius: 30,
+        
+    },
+
+  });
 
 export default Login

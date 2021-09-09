@@ -1,150 +1,201 @@
-import React, { useState, useEffect } from 'react';
-import { StyleSheet, View, Text, Image, FlatList, Button } from 'react-native';
-import { connect } from 'react-redux';
+import React, { useState, useEffect } from "react";
+import { StyleSheet, View, Text, Image, FlatList } from "react-native";
+// MATERIAL UI
+import { connect } from "react-redux";
+import { makeStyles } from "@material-ui/core/styles";
+import Avatar from "@material-ui/core/Avatar";
+import Container from "@material-ui/core/Container";
+import Card from "@material-ui/core/Card";
+import CardActions from "@material-ui/core/CardActions";
+import CardContent from "@material-ui/core/CardContent";
+import Button from "@material-ui/core/Button";
+import Typography from "@material-ui/core/Typography";
+import InputLabel from "@material-ui/core/InputLabel";
+import MenuItem from "@material-ui/core/MenuItem";
+import FormHelperText from "@material-ui/core/FormHelperText";
+import FormControl from "@material-ui/core/FormControl";
+import Select from "@material-ui/core/Select";
+import TextField from "@material-ui/core/TextField";
 
-import firebase from 'firebase/app';
-import 'firebase/firestore'
+//FIREBASE
+import firebase from "firebase/app";
+import "firebase/firestore";
+import { useUser } from "../../hooks/Users";
+import { MorningDelay } from "../../hooks/DayandTime";
 
 function Profile(props) {
-  const [userPosts, setUserPosts] = useState([]);
-  const [user, setUser] = useState(null);
-  const [following, setFollowing] = useState(false)
-  useEffect(() => {
-    const { currentUser, posts } = props;
-    console.log({ currentUser, posts });
+  const classes = useStyles();
+  const user = useUser(props.route.params.uid);
+  const delay = MorningDelay(props.timing);
+  
+  const onLogout = () => {
+    firebase.auth().signOut();
+  };
 
-    if (props.route.params.uid === firebase.auth().currentUser.uid) {
-      setUser(firebase.auth().currentUser);
-      setUserPosts(posts);
-    }else{
-            firebase.firestore()
-            .collection("users")
-            .doc(props.route.params.uid)
-            .get()
-            .then((snapshot) =>{
-                if(snapshot.exists){
-                    setUser(snapshot.data())
-                }else{
-                    console.log('does not exist')
-            }
-        })
-        firebase.firestore()
-        .collection("posts")
-        .doc(props.route.params.uid)
-        .collection("userPosts")
-        .orderBy("creation", "asc")
-        .get()
-        .then((snapshot) =>{
-            let posts = snapshot.docs.map(doc => {
-                const data = doc.data();
-                const id = doc.id;
-                return{id, ...data}
-      })
-      setUserPosts(posts)
-      })
+
+  function isCurrentUserProfile() {
+    if(props.route.params.uid === firebase.auth().currentUser.uid) {
+      return true;
+    } else {
+      return false;
     }
-    if(props.following.indexOf(props.route.params.uid) > -1){
-        setFollowing(true);
-    }else{
-        setFollowing(false)
-    }
-  },[props.route.params.uid, props.following]);
-
-
-  const onFollow = () =>{
-      firebase.firestore()
-      .collection("following")
-      .doc(firebase.auth().currentUser.uid)
-      .collection("userFollowing")
-      .doc(props.route.params.uid)
-      .set({})
   }
 
-  const onUnFollow = () =>{
-    firebase.firestore()
-    .collection("following")
-    .doc(firebase.auth().currentUser.uid)
-    .collection("userFollowing")
-    .doc(props.route.params.uid)
-    .delete()
-}
-
-const onLogout = () =>{
-    firebase.auth().signOut();
-}
-
-
+ 
 
   if (user === null) {
-    return <View />;
+    return <div className={classes.root} />;
   }
   return (
-    <View style={styles.container}>
-      <View style={styles.containerInfo}>
-        <Text> {user.name} </Text>
-        <Text> {user.email} </Text>
+    <div className={classes.root}>
+      <div className={classes.div}>
+        <Container>
+          <Avatar alt="Ana Pädagogin" className={classes.avatar} />
+          <Typography className={classes.text}> {user.name} </Typography>
+          <Typography className={classes.text}> {user.email} </Typography>
 
-        {props.route.params.uid !== firebase.auth().currentUser.uid ? (
-          <View> 
-              {following ? (
-                <Button
-                  title="Following"
-                  onPress={() => onUnFollow()}
-                />
-
-               
-              ) : 
-              (
-                <Button
-                title="Follow"
-                onPress={() => onFollow()}
+          {isCurrentUserProfile() ? (
+            <Button
+              className={classes.btn}
+              size="large"
+              variant="outlined"
+              onClick={() => onLogout()}
+            >
+              Logout
+            </Button>
+          ) : null}
+        </Container>
+        <Card>
+          {/* //Verspätung */}
+          <CardContent>
+            <Typography variant="h5" className={classes.cardTyp}>
+              {" "}
+              Verspätung{" "}
+            </Typography>
+            <Container className={classes.cardContainer}>
+              <TextField
+                id="time"
+                label="Zeit"
+                type="time"
+                defaultValue="07:30"
+                InputLabelProps={{
+                  shrink: true,
+                }}
+                inputProps={{
+                  step: 300, // 5 min
+                }}
+                onChange={(event) => {
+                  delay.timing;
+                }}
+                
               />
-              )}
-          </View>
-        ) : <Button
-        title="Logout"
-        onPress={() => onLogout()}
-      />}
-      </View>
-      <View style={styles.containerGallery}>
-        <FlatList
-          numColumns={3}
-          horizontal={false}
-          data={userPosts}
-          renderItem={({ item }) => (
-            <View style={styles.containerImage}>
-              <Image style={styles.image} source={{ uri: item.downloadURL }} />
-            </View>
-          )}
-        />
-      </View>
-    </View>
+              <Button className={classes.cardBtn} onClick={() => delay.timing}>Absenden</Button>
+            </Container>
+          </CardContent>
+
+          {/* //Krankenmledungen */}
+          <CardContent className={classes.cardKrankmeldung}>
+            <Typography variant="h5" className={classes.cardTyp}>
+              {" "}
+              Krankenmledungen{" "}
+            </Typography>
+            <Container className={classes.cardContainer}>
+              <TextField
+                id="date"
+                label="Von"
+                type="date"
+                defaultValue="2017-05-24"
+                className={classes.textField}
+                InputLabelProps={{
+                  shrink: true,
+                }}
+              />
+
+              <TextField
+                id="date"
+                label="bis"
+                type="date"
+                defaultValue="2017-05-24"
+                className={classes.textField}
+                InputLabelProps={{
+                  shrink: true,
+                }}
+              />
+            </Container>
+            <Button className={classes.cardBtnKM}>Absenden</Button>
+          </CardContent>
+
+          {/* //Verspätung Abolung*/}
+          <CardContent>
+            <Typography variant="h5" className={classes.cardTyp}>
+              {" "}
+              Verspätung Abholung
+            </Typography>
+            <Container className={classes.cardContainer}>
+              <TextField
+                id="time"
+                label="Zeit"
+                type="time"
+                defaultValue="07:30"
+                InputLabelProps={{
+                  shrink: true,
+                }}
+                inputProps={{
+                  step: 300, // 5 min
+                }}
+              />
+              <Button className={classes.cardBtn}>Absenden</Button>
+            </Container>
+          </CardContent>
+        </Card>
+      </div>
+    </div>
   );
 }
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  containerInfo: {
-    margin: 20,
-  },
-  containerGallery: {
-    flex: 1,
-  },
-  containerImage: {
-    flex: 1 / 3,
-  },
-  image: {
-    flex: 1,
-    aspectRatio: 1 / 1,
-  },
-});
 
 const mapStateToProps = (store) => ({
   currentUser: store.userState.currentUser,
   posts: store.userState.posts,
-  following: store.userState.following
+  following: store.userState.following,
 });
 
 export default connect(mapStateToProps, null)(Profile);
 
+const useStyles = makeStyles({
+  root: {
+    backgroundColor: "white",
+  },
+  div: {
+    marginTop: 20,
+    marginLeft: 15,
+    marginRight: 15,
+    backgroundColor: "white",
+  },
+  avatar: {
+    marginBottom: 10,
+  },
+  btn: {
+    marginTop: 10,
+    width: 250,
+    marginBottom: 30,
+  },
+  text: {
+    fontSize: 25,
+    marginTop: 10,
+  },
+  cardTyp: {
+    textAlign: "left",
+    paddingLeft: 13,
+  },
+  cardBtn: {
+    marginTop: 20,
+    marginLeft: 30,
+  },
+  cardBtnKM: {
+    marginTop: 20,
+    marginLeft: 10,
+  },
+  cardContainer: {
+    display: "flex",
+  },
+});

@@ -1,23 +1,44 @@
 import React, { useState } from 'react'
-import {  Button, TextInput, View } from 'react-native'
+import { TextInput, View, StyleSheet } from 'react-native'
 import firebase from 'firebase/app';
 import "firebase/firestore";
+import { Button, Checkbox} from '@material-ui/core';
+import FormControlLabel from '@material-ui/core/FormControlLabel';
+import { makeStyles } from '@material-ui/core/styles';
 
 
+
+const useStyles = makeStyles({
+    box:{
+        marginLeft: 16,
+        
+    },
+    btn:{
+        marginLeft: 13,
+        marginRight: 13,
+        backgroundColor: "green",
+        color: "white",
+        borderRadius: 30,
+    }
+})
 const Register = () =>{
-    const[email, setEmail] = useState('');
-    const[password, setPassword] = useState('');
-    const[name, setName] = useState('');
+    const classes = useStyles();
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const [name, setName] = useState('');
+    const [isTeacher, setIsTeacher] = useState(false);
 
   
     function onSignUp(){
         firebase.auth().createUserWithEmailAndPassword(email, password)
             .then((result) =>{
-                firebase.firestore().collection("users")
+                firebase.firestore()
+                    .collection("users")
                     .doc(firebase.auth().currentUser.uid)
                     .set({
                         name,
-                        email
+                        email,
+                        role: isTeacher ? "teacher" : "parent"
                     })
                 console.log(result)
             })
@@ -27,26 +48,48 @@ const Register = () =>{
 
   }
       return (
-          <View>
+          <View 
+          style={styles.root}
+          >
+              
+
             <TextInput
+                 style={styles.input}
                  placeholder="name"
-                 onChangeText={(name) => setName({ name })}
+                 onChangeText={(name) => setName( name )}
              />
           
               <TextInput
+                  style={styles.input}
                   placeholder="email"
-                  onChangeText={(email) => setEmail({ email })}
+                  onChangeText={(email) => setEmail( email )}
               />
               <TextInput
+                  style={styles.input}
                   placeholder="password"
                   secureTextEntry={true}
-                  onChangeText={(password) => setPassword({ password })}
+                  onChangeText={(password) => setPassword( password )}
               />
-  
+
+              <FormControlLabel
+                    label="Ich bin Pädagoge"
+                    control=
+                    {<Checkbox
+                        className={classes.box}
+                        value={isTeacher}
+                        onChange={setIsTeacher}
+                        />}
+                    />
+         
               <Button
-                  onPress={onSignUp}
-                  title="Sing in"
-              />
+                  className={classes.btn}
+                  onClick={onSignUp}
+                  size="medium"
+                  variant="outlined"
+                  
+                 
+              >On Sign Up</Button>
+           
           </View>
       )
     }
@@ -106,5 +149,27 @@ const Register = () =>{
 //         )
 //     }
 // }
+
+
+const styles = StyleSheet.create({
+    root: {
+        flex: 1,
+        backgroundColor: '#F4D1BB',
+       
+        
+    },
+    input: {
+      height: 40,
+      margin: 12,
+      borderWidth: 1,
+      padding: 10,
+      backgroundColor: "white",
+      borderRadius: 30,
+      
+    
+    },
+    
+   
+  });
 
 export default Register

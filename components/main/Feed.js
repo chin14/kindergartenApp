@@ -1,63 +1,76 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, View, Text, Image, FlatList, Button } from 'react-native';
+import { StyleSheet, View, Text, Image, FlatList, Button, ScrollView } from 'react-native';
 import { connect } from 'react-redux';
-
+import {useAllPosts} from '../../hooks/Posts';
+import { makeStyles } from '@material-ui/core/styles';
+import Avatar from '@material-ui/core/Avatar';
+import Divider from '@material-ui/core/Divider';
 import firebase from 'firebase/app';
 import 'firebase/firestore'
+import { Typography } from '@material-ui/core';
 
+
+
+const useStyles = makeStyles({
+  avatar:{
+    marginLeft: 15,
+    marginTop: 15,
+    marginBottom: 5,
+  },
+})
 function Feed(props) {
-  const [posts, setPosts] = useState([]);
+  const classes = useStyles();
+  const posts = useAllPosts(firebase.auth().currentUser.uid);
+  const [user, setUser] = useState(() => {
+    const user = firebase.auth().currentUser;
 
-  useEffect(() => {
-    let posts = [];
-    if(props.usersLoaded == props.following?.length){
-        for(let i = 0; i < props.following?.length; i++){
-            const user = props.users.find(el => el.uid === props.following[i]);
-            if(user != undefined){
-                posts = [...posts, ...user.posts]
-            }
-        }
-        posts.sort(function(x,y) {
-            return x.creation - y.creation;
-        })
-        setPosts(posts)
-    }
-  },[props.usersLoaded]);
-
-  
+    return user;
+  });
   return (
    
-      <View style={styles.containerGallery}>
+      <ScrollView style={styles.root}>
         <FlatList
           numColumns={1}
           horizontal={false}
           data={posts}
           renderItem={({ item }) => (
             <View style={styles.containerImage}>
-                <Text style={styles.container}>{item.user.name}</Text>
-              <Image style={styles.image} key={item.downloadURL + `?${new Date()}`} source={{ uri: item.downloadURL + `?${new Date()}`  }} />
+              <Image style={styles.image} key={item.downloadURL + `?${new Date()}`} source={{ uri: item.downloadURL  }} />
+              <View style={styles.container}>
+                 <Avatar alt={user.name} className={classes.avatar}/> 
+                </View>
+               <Text style={styles.containerInfo}>{item.caption}</Text>
+              <Divider />
             </View>
           )}
         />
-      </View>
+      </ScrollView>
   );
 }
 const styles = StyleSheet.create({
+  root:{
+    backgroundColor: "white"
+  },
   container: {
-    flex: 1,
+    display: "flex"
   },
   containerInfo: {
-    margin: 20,
+    marginTop: 20,
+    marginLeft: 15,
+    marginBottom: 10,
+    fontSize: 20,
   },
-  containerGallery: {
-    flex: 1,
-  },
+  // containerGallery: {
+  //   flex: 1,
+  // },
   containerImage: {
-    flex: 1 / 3,
+    marginTop: 15,
+    marginBottom: 30,
   },
   image: {
-    flex: 1,
-    aspectRatio: 1 / 1,
+    resizeMode:"cover",
+    aspectRatio: 1/1,
+    
   },
 });
 

@@ -23,22 +23,27 @@ export function useUser(uid) {
   return user;
 }
 
-/*export function useAllPosts() {
-  const [posts, setPosts] = useState([]);
+export function useAllUsers() {
+  const [users, setUsers] = useState(null);
 
   useEffect(() => {
+    const usersCollected = [];
     firebase
       .firestore()
-      .collectionGroup("userPosts")
+      .collection("users")
       .get()
-      .then((snapshots) => {
-        const postData = snapshots.docs.map((doc) => {
-          const data = doc.data();
-          const id = doc.id;
-          return { id, ...data };
+      .then((snapshot) => {
+        snapshot.forEach(doc => {
+          usersCollected.push({
+            ...(doc.data()),
+            uid : doc.id,
+          })
         });
-        setPosts(postData);
+        setUsers(usersCollected);
+        console.log(usersCollected);
       });
   }, []);
-  return posts;
-}*/
+  return users;
+}
+
+

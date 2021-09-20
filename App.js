@@ -1,117 +1,143 @@
-import { StatusBar } from 'expo-status-bar';
-import React, { useEffect, useState } from 'react';
-import { View, Text } from 'react-native';
+import { StatusBar } from "expo-status-bar";
+import React, { useEffect, useState } from "react";
+import { View, Text } from "react-native";
 
-import  firebase from 'firebase/app';
-import 'firebase/app';
-import 'firebase/firestore';
-import 'firebase/auth';
-import firebaseApp from './firebase'
-import { Provider } from 'react-redux';
-import { createStore, applyMiddleware } from 'redux';
-import rootReducer from './redux/reducers';
-import thunk from 'redux-thunk';
+import firebase from "firebase/app";
+import "firebase/app";
+import "firebase/firestore";
+import "firebase/auth";
+import firebaseApp from "./firebase";
+import { Provider } from "react-redux";
+import { createStore, applyMiddleware } from "redux";
+import rootReducer from "./redux/reducers";
+import thunk from "redux-thunk";
 
-const store = createStore(rootReducer, applyMiddleware(thunk))
+const store = createStore(rootReducer, applyMiddleware(thunk));
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
 
-
-if(firebase.apps.length === 0){
-  firebase.initializeApp(firebaseConfig)
+if (firebase.apps.length === 0) {
+  firebase.initializeApp(firebaseConfig);
 }
 
-import { NavigationContainer } from '@react-navigation/native';
-import { createStackNavigator } from '@react-navigation/stack';
+import { NavigationContainer } from "@react-navigation/native";
+import { createStackNavigator } from "@react-navigation/stack";
+import { createDrawerNavigator } from "@react-navigation/drawer";
 
-import LandingScreen from './components/auth/Landing';
-import RegisterScreen from './components/auth/Register';
-import MainScreen from './components/Main'
-import LoginScreen from './components/auth/Login'
-import AddScreen from './components/main/Add';
-import SaveScreen from './components/main/Save';
-import { Button } from '@material-ui/core';
+import LandingScreen from "./components/auth/Landing";
+import RegisterScreen from "./components/auth/Register";
+import MainScreen from "./components/Main";
+import LoginScreen from "./components/auth/Login";
+import AddScreen from "./components/main/Add";
+import SaveScreen from "./components/main/Save";
+import ChatScreen from "./Chat /Chat";
+import {
+  AppBar,
+  Button,
+  Toolbar,
+  Typography,
+  IconButton,
+} from "@material-ui/core";
+import MenuIcon from "@material-ui/icons/Menu";
+import { makeStyles } from "@material-ui/core/styles";
 
-
-
+const useStyles = makeStyles((theme) => ({
+  root: {
+    flexGrow: 1,
+  },
+  menuButton: {
+    marginRight: theme.spacing(2),
+  },
+  title: {
+    flexGrow: 1,
+  },
+}));
 const Stack = createStackNavigator();
 
-const Appf = ({navigation}) => {
-    const [loggedIn, setLoggedIn] = useState(false);
-    const [loaded, setLoaded] = useState(false);
+const Drawer = createDrawerNavigator();
 
-    useEffect(() => {
-      firebase.auth().onAuthStateChanged((user) =>{
-        if(!user){
-          setLoggedIn(false)
-        }else{
-          setLoggedIn(true)
-        }
-        // setLoggedIn(user !==)
-        setLoaded(true)
-      })
-    }, [])
+const Appf = ({ navigation }) => {
+  const [loggedIn, setLoggedIn] = useState(false);
+  const [loaded, setLoaded] = useState(false);
 
-   
-   
-    if(!loaded){
-      return(
-        <View style={{ flex: 1, justifyContent: 'center'}}>
-          <Text>Loading</Text>
-        </View>
-      )
-    }
-    if(!loggedIn){
+  useEffect(() => {
+    firebase.auth().onAuthStateChanged((user) => {
+      if (!user) {
+        setLoggedIn(false);
+      } else {
+        setLoggedIn(true);
+      }
+      // setLoggedIn(user !==)
+      setLoaded(true);
+    });
+  }, []);
+
+  if (!loaded) {
+    return (
+      <View style={{ flex: 1, justifyContent: "center" }}>
+        <Text>Loading</Text>
+      </View>
+    );
+  }
+  if (!loggedIn) {
     return (
       <NavigationContainer>
         <Stack.Navigator initalRouteName="Landing">
-          <Stack.Screen 
-          name="Landing" 
-          component={ LandingScreen } 
-          options={{ headerShown: false}}/>
-          <Stack.Screen 
-          name="Register" 
-          component={ RegisterScreen } 
-          options={{  headerStyle: {
-            backgroundColor: '#F4D1BB',
-            
-          }
-          }} />
-          <Stack.Screen 
-          name="Login" 
-          component={ LoginScreen }
-          options={{  headerStyle: {
-            backgroundColor: '#F4D1BB',
-            
-          }
-          }}
-           />
+          <Stack.Screen
+            name="Landing"
+            component={LandingScreen}
+            options={{ headerShown: false }}
+          />
+          <Stack.Screen
+            name="Register"
+            component={RegisterScreen}
+            options={{
+              headerStyle: {
+                backgroundColor: "#F4D1BB",
+              },
+            }}
+          />
+          <Stack.Screen
+            name="Login"
+            component={LoginScreen}
+            options={{
+              headerStyle: {
+                backgroundColor: "#F4D1BB",
+              },
+            }}
+          />
         </Stack.Navigator>
       </NavigationContainer>
     );
   }
-  return(
+  return (
     <Provider store={store}>
-     <NavigationContainer>
-      <Stack.Navigator initalRouteName="Main" >
-          <Stack.Screen name="Kindergarten" component={ MainScreen } options={{  headerStyle: {
-            backgroundColor: '#F4D1BB', 
-          },
-          headerRight: () => (
-            <Button
-              label="Info"
-              color="#fff"
-            >Info</Button>
-          ),
-          }}/>
-          <Stack.Screen name="Add" component={ AddScreen } navigation={navigation} />
-          <Stack.Screen name="Save" component={ SaveScreen } navigation={navigation} />
+    
+      {/*<NavigationContainer>
+        <Stack.Navigator initalRouteName="Main">
+          <Stack.Screen name="Kindergarten" component={MainScreen} />
+          <Stack.Screen
+            name="Add"
+            component={AddScreen}
+            navigation={navigation}
+            options={{ title: "Awesome app" }}
+          />
+          <Stack.Screen
+            name="Save"
+            component={SaveScreen}
+            navigation={navigation}
+          />
         </Stack.Navigator>
+      </NavigationContainer>*/}
+
+      <NavigationContainer>
+        <Drawer.Navigator initialRouteName="Profile">
+          <Drawer.Screen name="Home" component={MainScreen} />
+          <Drawer.Screen name="Chat" component={ChatScreen} />
+        </Drawer.Navigator>
       </NavigationContainer>
     </Provider>
-    
-  )
-    
-}
+  );
+};
 // export class App extends Component {
 //   constructor(props){
 //     super();
@@ -165,13 +191,9 @@ const Appf = ({navigation}) => {
 //         </Stack.Navigator>
 //       </NavigationContainer>
 //     </Provider>
-    
+
 //   )
 // }
 // }
 
-export default Appf
-
- 
-
-
+export default Appf;

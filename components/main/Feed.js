@@ -21,13 +21,8 @@ const useStyles = makeStyles({
 function Feed(props) {
   const classes = useStyles();
   const posts = useAllPosts(firebase.auth().currentUser.uid);
-  const [user, setUser] = useState(() => {
-    const user = firebase.auth().currentUser;
-
-    return user;
-  });
   return (
-   
+
       <ScrollView style={styles.root}>
         <FlatList
           numColumns={1}
@@ -37,7 +32,7 @@ function Feed(props) {
             <View style={styles.containerImage}>
               <Image style={styles.image} key={item.downloadURL + `?${new Date()}`} source={{ uri: item.downloadURL  }} />
               <View style={styles.container}>
-                 <Avatar alt={user.name} className={classes.avatar}/> 
+                 <Avatar className={classes.avatar}/> 
                 </View>
                <Text style={styles.containerInfo}>{item.caption}</Text>
               <Divider />

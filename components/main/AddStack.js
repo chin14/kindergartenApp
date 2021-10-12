@@ -16,7 +16,7 @@ export default function AddStack() {
       <Stack.Screen
         name="Add"
         component={AddScreen}
-        options={{ title: "Awesome app" }}
+        options={{ headerShown: false}}
       />
       <Stack.Screen name="Save" component={SaveScreen} />
     </Stack.Navigator>

@@ -39,7 +39,6 @@ const EmptyScreen = () => {
 };
 
 const Main = (props) => {
-    
   useEffect(() => {
     props.fetchUser();
     props.clearData();
@@ -48,7 +47,11 @@ const Main = (props) => {
   }, []);
 
   return (
-    <Tab.Navigator initialRouteName="Feed" labeled={false}>
+    <Tab.Navigator
+      initialRouteName="Feed"
+      labeled={false}
+      barStyle={{ backgroundColor: "#708E7C" }}
+    >
       <Tab.Screen
         name="Feed"
         component={FeedScreen}
@@ -56,21 +59,7 @@ const Main = (props) => {
           tabBarIcon: ({ color, size }) => (
             <MaterialCommunityIcons
               name="home"
-              color={color}
-              size={26}
-            ></MaterialCommunityIcons>
-          ),
-        }}
-      />
-      <Tab.Screen
-        name="Search"
-        component={SearchScreen}
-        navigation={props.navigation}
-        options={{
-          tabBarIcon: ({ color, size }) => (
-            <MaterialCommunityIcons
-              name="magnify"
-              color={color}
+              color="white"
               size={26}
             ></MaterialCommunityIcons>
           ),
@@ -83,7 +72,7 @@ const Main = (props) => {
           tabBarIcon: ({ color, size }) => (
             <MaterialCommunityIcons
               name="plus-box"
-              color={color}
+              color="white"
               size={26}
             ></MaterialCommunityIcons>
           ),
@@ -104,33 +93,7 @@ const Main = (props) => {
           tabBarIcon: ({ color, size }) => (
             <MaterialCommunityIcons
               name="account-circle"
-              color={color}
-              size={26}
-            ></MaterialCommunityIcons>
-          ),
-        }}
-      />
-      <Tab.Screen
-        name="Calender"
-        component={CalenderScreen}
-        options={{
-          tabBarIcon: ({ color, size }) => (
-            <MaterialCommunityIcons
-              name="calendar-check"
-              color={color}
-              size={26}
-            ></MaterialCommunityIcons>
-          ),
-        }}
-      />
-      <Tab.Screen
-        name="Chat"
-        component={ChatScreen}
-        options={{
-          tabBarIcon: ({ color, size }) => (
-            <MaterialCommunityIcons
-              name="chat"
-              color={color}
+              color="white"
               size={26}
             ></MaterialCommunityIcons>
           ),

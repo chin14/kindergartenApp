@@ -24,14 +24,13 @@ export function useUsersPosts(uid) {
   }, [uid]);
 
   return posts;
-
 }
 
 export function useAllPosts() {
-    const [posts, setPosts] = useState([]);
+  const [posts, setPosts] = useState([]);
 
-    useEffect(() => {
-      firebase
+  useEffect(() => {
+    firebase
       .firestore()
       .collectionGroup("userPosts")
       .get()
@@ -40,11 +39,9 @@ export function useAllPosts() {
           const data = doc.data();
           const id = doc.id;
           return { id, ...data };
-        })
+        });
         setPosts(postData);
       });
   }, []);
   return posts;
 }
-
-

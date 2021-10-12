@@ -6,21 +6,15 @@ import { makeStyles } from "@material-ui/core/styles";
 import Avatar from "@material-ui/core/Avatar";
 import Container from "@material-ui/core/Container";
 import Card from "@material-ui/core/Card";
-import CardActions from "@material-ui/core/CardActions";
 import CardContent from "@material-ui/core/CardContent";
 import Button from "@material-ui/core/Button";
 import Typography from "@material-ui/core/Typography";
-import InputLabel from "@material-ui/core/InputLabel";
-import MenuItem from "@material-ui/core/MenuItem";
-import FormHelperText from "@material-ui/core/FormHelperText";
-import FormControl from "@material-ui/core/FormControl";
-import Select from "@material-ui/core/Select";
 import TextField from "@material-ui/core/TextField";
 //FIREBASE
 import firebase from "firebase/app";
 import "firebase/firestore";
+import "firebase/auth";
 import { useUser } from "../../hooks/Users";
-import { DayandTime } from "../../hooks/DayandTime";
 import { db } from "../../firebase";
 import {
   List,
@@ -43,6 +37,10 @@ function Profile(props, navigation) {
   const [sickDaysStart, setSickDaysStart] = useState(Date.now());
   const [sickDaysEnd, setSickDaysEnd] = useState(Date.now());
   const [sickDaysConfirm, setSickDaysConfirm] = useState([]);
+  const [downloadURL, setDownloadURL] = useState([]);
+  const [profilePictureUrl, setProfilePictureUrl] = useState(
+    firebase.auth().currentUser.photoURL
+  );
 
   const onLogout = () => {
     firebase.auth().signOut();
@@ -61,11 +59,14 @@ function Profile(props, navigation) {
     setTimeAfternoon(e.target.value);
   }
   function delayMorning() {
+    console.log(time);
+    setTiming([...timing, { time }]);
     db.collection("delayInTheMorning")
       .doc()
       .set({
         time,
         user,
+        uid: props.route.params.uid,
       })
       .then(() => {
         //If you wish to push the written data to your local state, you can do it here
@@ -76,6 +77,25 @@ function Profile(props, navigation) {
         console.log(err);
       });
   }
+
+  function fetchTimeEntries() {
+    firebase
+      .firestore()
+      .collection("delayInTheMorning")
+      .get()
+      .then((snapshot) => {
+        let loadedPosts = snapshot.docs.map((doc) => {
+          console.log(doc.data());
+          return doc.data();
+        });
+        setTiming(loadedPosts);
+      });
+  }
+
+  useEffect(() => {
+    fetchTimeEntries();
+  }, []);
+
   function delayAfternoon() {
     db.collection("delayInTheAfternoon")
       .doc()
@@ -91,6 +111,24 @@ function Profile(props, navigation) {
         console.log(err);
       });
   }
+
+  function fetchTimeAfternoonEntries() {
+    firebase
+      .firestore()
+      .collection("delayInTheAfternoon")
+      .get()
+      .then((snapshot) => {
+        let loadedPosts = snapshot.docs.map((doc) => {
+          console.log(doc.data());
+          return doc.data();
+        });
+        setTimingAfternoon(loadedPosts);
+      });
+  }
+
+  useEffect(() => {
+    fetchTimeAfternoonEntries();
+  }, []);
 
   function sickDaysStartEnd() {
     db.collection("DaysofSickness")
@@ -113,6 +151,24 @@ function Profile(props, navigation) {
       });
   }
 
+  function fetchSickDaysEntries() {
+    firebase
+      .firestore()
+      .collection("DaysofSickness")
+      .get()
+      .then((snapshot) => {
+        let loadedPosts = snapshot.docs.map((doc) => {
+          console.log(doc.data());
+          return doc.data();
+        });
+        setSickDaysConfirm(loadedPosts);
+      });
+  }
+
+  useEffect(() => {
+    fetchSickDaysEntries();
+  }, []);
+
   function isCurrentUserProfile() {
     if (props.route.params.uid === firebase.auth().currentUser.uid) {
       return true;
@@ -132,35 +188,49 @@ function Profile(props, navigation) {
     const snap = await usersImageRef.put(file);
 
     const downloadURL = await snap.ref.getDownloadURL();
-    setDownlaodURL(downloadURL);
+    setDownloadURL(downloadURL);
 
-    await firebase.auth().updateProfile({ photoURL: downloadURL });
+    
+
+    // db.collection("users").doc("users").update({
+    //   photoURL: downloadURL
+    // }).then(function() {
+    //   console.log("Frank food updated");
+    // });
+    // Hier photoUrl in der user collection speichern
+    // -> {name : "...", email : "...", role : "...", photoUrl : "..."}
+    
+    await firebase.auth().currentUser.updateProfile({ photoURL: downloadURL });
+    setProfilePictureUrl(downloadURL);
   }
-
   if (user === null) {
     return <div className={classes.root} />;
   }
   return (
     <ScrollView style={styles.root}>
       <Container className={classes.div}>
-        <label htmlFor="contained-button-file">
+        <input
+          accept="image/*"
+          className={classes.input}
+          id="contained-button-file"
+          multiple
+          type="file"
+          onChange={handleFileInputChange}
+        />
+        <label>
           <IconButton>
-            <Avatar
-              src="../../assets/ana.png"
+            <Image
+              source={{
+                uri: profilePictureUrl,
+              }}
               style={{
-                margin: "10px",
-                width: "60px",
-                height: "60px",
+                marginTop: "10px",
+                width: "100px",
+                height: "100px",
+                borderRadius: "60px"
               }}
             />
           </IconButton>
-          <input
-            accept="image/*"
-            className={classes.input}
-            id="contained-button-file"
-            type="file"
-            onChange={handleFileInputChange}
-          />
         </label>
         <Typography className={classes.text}> {user.name} </Typography>
         <Typography className={classes.text}> {user.email} </Typography>
@@ -174,11 +244,11 @@ function Profile(props, navigation) {
           >
             Logout
           </Button>
-        ) : null}
+         ) : null} 
       </Container>
       <Card className={classes.div}>
         {/* //Verspätung */}
-        <CardContent>
+        <CardContent className={classes.cardBackGround}>
           <Typography variant="h5" className={classes.cardTyp}>
             {" "}
             Verspätung{" "}
@@ -206,7 +276,7 @@ function Profile(props, navigation) {
         </CardContent>
 
         {/* //Krankenmledungen */}
-        <CardContent className={classes.cardKrankmeldung}>
+        <CardContent className={classes.cardBackGround}>
           <Typography variant="h5" className={classes.cardTyp}>
             Krankenmledungen
           </Typography>
@@ -248,7 +318,7 @@ function Profile(props, navigation) {
         </CardContent>
 
         {/* //Verspätung Abolung*/}
-        <CardContent>
+        <CardContent className={classes.cardBackGround}>
           <Typography variant="h5" className={classes.cardTyp}>
             {" "}
             Verspätung Abholung
@@ -283,29 +353,29 @@ function Profile(props, navigation) {
       {/* Verspätungs Liste */}
       {timing.map((item) => {
         return (
-          <List>
-            <ListItem>
+          <List className={classes.lists}>
+            <ListItem className={classes.list1}>
               <ListItemAvatar>
                 <Avatar></Avatar>
               </ListItemAvatar>
               <ListItemText
-                primary={user.name}
+                primary={item.user?.name ?? user.name}
                 secondary={`Verspätung in der Früh ${item.time}`}
               />
             </ListItem>
           </List>
         );
       })}
-     {/* Krankmeldung */}
+      {/* Krankmeldung */}
       {timingAfternoon.map((item) => {
         return (
-          <List>
-            <ListItem>
+          <List className={classes.lists}>
+            <ListItem className={classes.list}>
               <ListItemAvatar>
                 <Avatar></Avatar>
               </ListItemAvatar>
               <ListItemText
-                primary={user.name}
+                primary={item.user?.name ?? user.name}
                 secondary={`Verspätung bei der Abholung ${item.timeAfternoon}`}
               />
             </ListItem>
@@ -315,13 +385,13 @@ function Profile(props, navigation) {
       {/* Verspätungs Nachmittag */}
       {sickDaysConfirm.map((item) => {
         return (
-          <List>
-            <ListItem>
+          <List className={classes.lists}>
+            <ListItem className={classes.list}>
               <ListItemAvatar>
                 <Avatar></Avatar>
               </ListItemAvatar>
               <ListItemText
-                primary={user.name}
+                primary={item.user?.name ?? user.name}
                 secondary={`Krankmeldung von ${item.sickDaysStart} bis ${item.sickDaysEnd}`}
               />
             </ListItem>
@@ -336,10 +406,6 @@ const mapStateToProps = (store) => ({
   currentUser: store.userState.currentUser,
   posts: store.userState.posts,
   following: store.userState.following,
-  sickDaysConfirm: store.userState.sickDaysConfirm,
-  delayAfternoon: store.userState.delayAfternoon,
-  delayMorning: store.userState.delayMorning,
-  
 });
 
 export default connect(mapStateToProps, null)(Profile);
@@ -353,6 +419,19 @@ const useStyles = makeStyles({
     marginLeft: 15,
     marginRight: 15,
     backgroundColor: "white",
+  },
+  list1: {
+    marginTop: 20,
+    backgroundColor: "#D7E0DB",
+  },
+  list: {
+    marginTop: 10,
+    backgroundColor: "#D7E0DB",
+  },
+  lists: {
+    marginLeft: 15,
+    marginRight: 15,
+    borderRadius: "30%",
   },
   avatar: {
     marginBottom: 10,
@@ -380,6 +459,9 @@ const useStyles = makeStyles({
   },
   cardContainer: {
     display: "flex",
+  },
+  cardBackGround: {
+    backgroundColor: "#D7E0DB",
   },
 });
 

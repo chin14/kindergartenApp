@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { makeStyles } from "@material-ui/core/styles";
 import TextField from "@material-ui/core/TextField";
 import Card from "@material-ui/core/Card";
@@ -14,18 +14,19 @@ import firebase from "firebase/app";
 import "firebase/firestore";
 import { db } from "../../firebase";
 import { ScrollView } from "react-native-gesture-handler";
+import { connect } from "react-redux";
 
 
 
 
-
-export default function DateAndTimePickers() {
+ function DateAndTimePickers() {
   const classes = useStyles();
   const [ort, setOrt] = useState("");
   const [notiz, setNotiz] = useState("");
   const [hinweis, setHinweis] = useState("");
   const [eintragen, setEintragen] = useState([]);
   const [dateandtime, setDateandtime] = useState([]);
+ 
 
   function handelDateandTime(e) {
     setDateandtime(e.target.value);
@@ -40,7 +41,7 @@ export default function DateAndTimePickers() {
     setHinweis(e.target.value);
   }
   function KalenderEintrag() {
-    db.collection("Eintrag")
+    db.collection("eintrag")
       .doc()
       .set({
         ort,
@@ -49,7 +50,7 @@ export default function DateAndTimePickers() {
         dateandtime,
       })
       .then(() => {
-        //If you wish to push the written data to your local state, you can do it here
+
         setEintragen([...eintragen, { ort, notiz, hinweis, dateandtime }]);
         console.log("Documents saved succesfully");
       })
@@ -57,6 +58,25 @@ export default function DateAndTimePickers() {
         console.log(err);
       });
   }
+
+  function fetchKalendareintrag() {
+    firebase
+      .firestore()
+      .collection("eintrag")
+      .get()
+      .then((snapshot) => {
+        let loadedIfnos = snapshot.docs.map((doc) => {
+          console.log(doc.data());
+          return doc.data();
+        });
+        setEintragen(loadedIfnos);
+      });
+  }
+
+  useEffect(() => {
+    fetchKalendareintrag();
+  }, []);
+
   return (
     <ScrollView style={styles.root}>
       <Container>
@@ -139,9 +159,7 @@ export default function DateAndTimePickers() {
             </Typography>
           </CardContent>
           <CardActions>
-            <Button size="small" variant="outlined">
-              Zur Kenntniss genommen
-            </Button>
+            
           </CardActions>
         </Card>
         )
@@ -149,6 +167,15 @@ export default function DateAndTimePickers() {
     </ScrollView>
   );
 }
+
+
+
+const mapStateToProps = (store) => ({
+  eintrag: store.userState.currentUser,
+ 
+});
+export default connect(mapStateToProps, null)(DateAndTimePickers);
+
 
 
 //material UI style

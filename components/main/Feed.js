@@ -1,54 +1,107 @@
-import React, { useState, useEffect } from 'react';
-import { StyleSheet, View, Text, Image, FlatList, Button, ScrollView } from 'react-native';
-import { connect } from 'react-redux';
-import {useAllPosts} from '../../hooks/Posts';
-import { makeStyles } from '@material-ui/core/styles';
-import Avatar from '@material-ui/core/Avatar';
-import Divider from '@material-ui/core/Divider';
-import firebase from 'firebase/app';
-import 'firebase/firestore'
-import { Typography } from '@material-ui/core';
-
-
+import React, { useState, useEffect } from "react";
+import {
+  StyleSheet,
+  View,
+  Text,
+  Image,
+  FlatList,
+  Button,
+  ScrollView,
+} from "react-native";
+import { connect } from "react-redux";
+import { useAllPosts } from "../../hooks/Posts";
+import { useUser, useAllUsers } from "../../hooks/Users";
+import { makeStyles } from "@material-ui/core/styles";
+import Avatar from "@material-ui/core/Avatar";
+import Divider from "@material-ui/core/Divider";
+import firebase from "firebase/app";
+import "firebase/firestore";
+import "firebase/auth";
+import { Typography } from "@material-ui/core";
 
 const useStyles = makeStyles({
-  avatar:{
+  avatar: {
     marginLeft: 15,
     marginTop: 15,
     marginBottom: 5,
   },
-})
-function Feed(props) {
+  text: {
+    marginTop: 20,
+    marginLeft: 15,
+    fontStyle: "bold",
+  },
+});
+function Feed() {
   const classes = useStyles();
-  const posts = useAllPosts(firebase.auth().currentUser.uid);
-  return (
+  const posts = useAllPosts();
+  const users = useAllUsers();
+  
 
-      <ScrollView style={styles.root}>
-        <FlatList
-          numColumns={1}
-          horizontal={false}
-          data={posts}
-          renderItem={({ item }) => (
+
+  return (
+    <ScrollView style={styles.root}>
+      <FlatList
+        numColumns={1}
+        horizontal={false}
+        data={posts}
+        renderItem={({ item }) => {
+          //wie heißt der user der post item gemacht hat?
+          const postUserId = item.uid;
+          const postUser = users.find((user) => user.uid === postUserId);
+          const a = firebase
+          .storage()
+          .ref('user')
+          .listAll()
+          .then(snap => {
+            snap.items.forEach(itemRef => {
+              itemRef.getDownloadURL().then(imgUrl => {
+                console.log(imgUrl)
+              });
+            })
+          })
+          return (
             <View style={styles.containerImage}>
-              <Image style={styles.image} key={item.downloadURL + `?${new Date()}`} source={{ uri: item.downloadURL  }} />
+              <Image
+                style={styles.image}
+                key={item.downloadURL + `?${new Date()}`}
+                source={{ uri: item.downloadURL }}
+              />
               <View style={styles.container}>
-                 <Avatar className={classes.avatar}/> 
-                </View>
-               <Text style={styles.containerInfo}>{item.caption}</Text>
+                <Image
+                  source={{
+                    uri: a.photoURL,
+                  }}
+                  style={{
+                    margin: "10px",
+                    width: "60px",
+                    height: "60px",
+                  }}
+                />
+               
+                <Typography className={classes.text}>
+                  {postUser?.name ?? "User not found!"}
+                </Typography>
+              </View>
+              <Text style={styles.containerInfo}>{item.caption}</Text>
               <Divider />
             </View>
-          )}
-        />
-      </ScrollView>
+          );
+        }}
+      />
+    </ScrollView>
   );
 }
 const styles = StyleSheet.create({
-  root:{
-    backgroundColor: "white"
+  root: {
+    backgroundColor: "white",
   },
   container: {
-    display: "flex"
+    display: "flex",
+    width: "100%",
+    flexDirection: "row",
+    justifyContent: "flex-start",
   },
+
   containerInfo: {
     marginTop: 20,
     marginLeft: 15,
@@ -63,9 +116,8 @@ const styles = StyleSheet.create({
     marginBottom: 30,
   },
   image: {
-    resizeMode:"cover",
-    aspectRatio: 1/1,
-    
+    resizeMode: "cover",
+    aspectRatio: 1 / 1,
   },
 });
 
@@ -74,8 +126,6 @@ const mapStateToProps = (store) => ({
   following: store.userState.following,
   users: store.usersState.users,
   usersLoaded: store.usersState.usersLoaded,
-
 });
 
 export default connect(mapStateToProps, null)(Feed);
-

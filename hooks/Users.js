@@ -24,7 +24,7 @@ export function useUser(uid) {
 }
 
 export function useAllUsers() {
-  const [users, setUsers] = useState(null);
+  const [users, setUsers] = useState([]);
 
   useEffect(() => {
     const usersCollected = [];
@@ -33,11 +33,11 @@ export function useAllUsers() {
       .collection("users")
       .get()
       .then((snapshot) => {
-        snapshot.forEach(doc => {
+        snapshot.forEach((doc) => {
           usersCollected.push({
-            ...(doc.data()),
-            uid : doc.id,
-          })
+            ...doc.data(),
+            uid: doc.id,
+          });
         });
         setUsers(usersCollected);
         console.log(usersCollected);
@@ -45,5 +45,3 @@ export function useAllUsers() {
   }, []);
   return users;
 }
-
-

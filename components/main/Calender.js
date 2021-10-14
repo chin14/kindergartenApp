@@ -15,18 +15,16 @@ import "firebase/firestore";
 import { db } from "../../firebase";
 import { ScrollView } from "react-native-gesture-handler";
 import { connect } from "react-redux";
+import { useUser } from "../../hooks/Users";
 
-
-
-
- function DateAndTimePickers() {
+function DateAndTimePickers(props) {
+  const user = useUser(firebase.auth().currentUser.uid);
   const classes = useStyles();
   const [ort, setOrt] = useState("");
   const [notiz, setNotiz] = useState("");
   const [hinweis, setHinweis] = useState("");
   const [eintragen, setEintragen] = useState([]);
   const [dateandtime, setDateandtime] = useState([]);
- 
 
   function handelDateandTime(e) {
     setDateandtime(e.target.value);
@@ -50,7 +48,6 @@ import { connect } from "react-redux";
         dateandtime,
       })
       .then(() => {
-
         setEintragen([...eintragen, { ort, notiz, hinweis, dateandtime }]);
         console.log("Documents saved succesfully");
       })
@@ -79,104 +76,106 @@ import { connect } from "react-redux";
 
   return (
     <ScrollView style={styles.root}>
-      <Container>
-        <TextField
-          id="datetime-local"
-          label="Neues Ereigniss"
-          type="datetime-local"
-          defaultValue="2021-09-16T10:30"
-          className={classes.root}
-          InputLabelProps={{
-            shrink: true,
-          }}
-          onChange={(value) => {
-            handelDateandTime(value);
-          }}
-        />
-      </Container>
-      {/* ORT */}
-      <Container className={classes.ortContainer}>
-        <TextField
-          id="standard-helperText"
-          label="Ort"
-          defaultValue="Text"
-          onChange={(value) => {
-            handelOrt(value);
-          }}
-        />
-      </Container>
-      {/* Hinweis */}
-      <Container className={classes.ortContainer}>
-        <TextField
-          id="standard-helperText"
-          label="Hinweis"
-          defaultValue="Text"
-          onChange={(value) => {
-            handelHinweis(value);
-          }}
-        />
-      </Container>
-      {/* Notizen */}
-      <Container className={classes.ortContainer}>
-        <TextField
-          id="standard-helperText"
-          label="Notizen"
-          defaultValue="Text"
-          onChange={(value) => {
-            handelNotiz(value);
-          }}
-        />
-      </Container>
-      
+      {user?.role === "pädagoge" && (
+        <>
+          <Container>
+            <TextField
+              id="datetime-local"
+              label="Neues Ereigniss"
+              type="datetime-local"
+              defaultValue="2021-09-16T10:30"
+              className={classes.root}
+              InputLabelProps={{
+                shrink: true,
+              }}
+              onChange={(value) => {
+                handelDateandTime(value);
+              }}
+            />
+          </Container>
+          {/* ORT */}
+          <Container className={classes.ortContainer}>
+            <TextField
+              id="standard-helperText"
+              label="Ort"
+              defaultValue="Text"
+              onChange={(value) => {
+                handelOrt(value);
+              }}
+            />
+          </Container>
+          {/* Hinweis */}
+          <Container className={classes.ortContainer}>
+            <TextField
+              id="standard-helperText"
+              label="Hinweis"
+              defaultValue="Text"
+              onChange={(value) => {
+                handelHinweis(value);
+              }}
+            />
+          </Container>
+          {/* Notizen */}
+          <Container className={classes.ortContainer}>
+            <TextField
+              id="standard-helperText"
+              label="Notizen"
+              defaultValue="Text"
+              onChange={(value) => {
+                handelNotiz(value);
+              }}
+            />
+          </Container>
+       
+    
 
       <Container>
-        <Button onClick={() => KalenderEintrag()}  className={classes.btn} variant="outlined">Absenden</Button>
+        <Button
+          onClick={() => KalenderEintrag()}
+          className={classes.btn}
+          variant="outlined"
+        >
+          Absenden
+        </Button>
       </Container>
+      </>  )}
 
       {/* Kalender einträge  */}
       {/* Kalender einträge  */}
       {eintragen.map((item) => {
         return (
           <Card className={classes.card}>
-          <CardContent>
-            <Typography
-              className={classes.title}
-              color="textSecondary"
-              gutterBottom
-            >
-              {item.ort}
-            </Typography>
-            <Typography variant="h5" component="h2">
-              {item.hinweis}
-            </Typography>
-            <Typography className={classes.pos} color="textSecondary">
-              {item.notiz}
-            </Typography>
-            <Typography variant="body2" component="p">
-              {item.dateandtime}
-              <br />
-             
-            </Typography>
-          </CardContent>
-          <CardActions>
-            
-          </CardActions>
-        </Card>
-        )
+            <CardContent>
+              <Typography
+                className={classes.title}
+                color="textSecondary"
+                gutterBottom
+              >
+                {item.ort}
+              </Typography>
+              <Typography variant="h5" component="h2">
+                {item.hinweis}
+              </Typography>
+              <Typography className={classes.pos} color="textSecondary">
+                {item.notiz}
+              </Typography>
+              <Typography variant="body2" component="p">
+                {item.dateandtime}
+                <br />
+              </Typography>
+            </CardContent>
+            <CardActions></CardActions>
+          </Card>
+        );
       })}
     </ScrollView>
   );
 }
 
-
-
 const mapStateToProps = (store) => ({
   eintrag: store.userState.currentUser,
- 
 });
 export default connect(mapStateToProps, null)(DateAndTimePickers);
-
-
 
 //material UI style
 const useStyles = makeStyles({
@@ -208,10 +207,10 @@ const useStyles = makeStyles({
     marginLeft: 15,
     marginRight: 15,
   },
-  btn:{
+  btn: {
     marginTop: 20,
     marginLeft: 15,
-  }
+  },
 });
 
 //React native style

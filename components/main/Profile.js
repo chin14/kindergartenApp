@@ -14,7 +14,7 @@ import TextField from "@material-ui/core/TextField";
 import firebase from "firebase/app";
 import "firebase/firestore";
 import "firebase/auth";
-import { useUser } from "../../hooks/Users";
+import { useUser, useUserRole } from "../../hooks/Users";
 import { db } from "../../firebase";
 import {
   List,
@@ -29,7 +29,7 @@ import { ScrollView } from "react-native-gesture-handler";
 
 function Profile(props, navigation) {
   const classes = useStyles();
-  const user = useUser(props.route.params.uid);
+  const user = useUser(firebase.auth().currentUser.uid);
   const [time, setTime] = useState("7:30");
   const [timing, setTiming] = useState([]);
   const [timeAfternoon, setTimeAfternoon] = useState("7:30");
@@ -41,6 +41,7 @@ function Profile(props, navigation) {
   const [profilePictureUrl, setProfilePictureUrl] = useState(
     firebase.auth().currentUser.photoURL
   );
+  console.log(user);
 
   const onLogout = () => {
     firebase.auth().signOut();
@@ -101,6 +102,7 @@ function Profile(props, navigation) {
       .doc()
       .set({
         timeAfternoon,
+        user
       })
       .then(() => {
         //If you wish to push the written data to your local state, you can do it here
@@ -190,8 +192,6 @@ function Profile(props, navigation) {
     const downloadURL = await snap.ref.getDownloadURL();
     setDownloadURL(downloadURL);
 
-    
-
     // db.collection("users").doc("users").update({
     //   photoURL: downloadURL
     // }).then(function() {
@@ -199,8 +199,23 @@ function Profile(props, navigation) {
     // });
     // Hier photoUrl in der user collection speichern
     // -> {name : "...", email : "...", role : "...", photoUrl : "..."}
-    
-    await firebase.auth().currentUser.updateProfile({ photoURL: downloadURL });
+
+    await firebase
+      .auth()
+      .currentUser.updateProfile({ photoURL: downloadURL })
+      .then(() => {
+        db.collection("users")
+          .doc(firebase.auth().currentUser.uid)
+          .update({
+            photoURL: downloadURL,
+          })
+          .catch((err) => {
+            console.log(err);
+          });
+      })
+      .catch((err) => {
+        console.log(err);
+      });
     setProfilePictureUrl(downloadURL);
   }
   if (user === null) {
@@ -227,7 +242,7 @@ function Profile(props, navigation) {
                 marginTop: "10px",
                 width: "100px",
                 height: "100px",
-                borderRadius: "60px"
+                borderRadius: "60px",
               }}
             />
           </IconButton>
@@ -244,120 +259,124 @@ function Profile(props, navigation) {
           >
             Logout
           </Button>
-         ) : null} 
+        ) : null}
       </Container>
-      <Card className={classes.div}>
-        {/* //Verspätung */}
-        <CardContent className={classes.cardBackGround}>
-          <Typography variant="h5" className={classes.cardTyp}>
-            {" "}
-            Verspätung{" "}
-          </Typography>
-          <Container className={classes.cardContainer}>
-            <TextField
-              id="time"
-              label="Zeit"
-              type="time"
-              defaultValue="07:30"
-              InputLabelProps={{
-                shrink: true,
-              }}
-              inputProps={{
-                step: 300, // 5 min
-              }}
-              onChange={(value) => {
-                handleTime(value);
-              }}
-            />
-            <Button className={classes.cardBtn} onClick={() => delayMorning()}>
-              Absenden
-            </Button>
-          </Container>
-        </CardContent>
 
-        {/* //Krankenmledungen */}
-        <CardContent className={classes.cardBackGround}>
-          <Typography variant="h5" className={classes.cardTyp}>
-            Krankenmledungen
-          </Typography>
-          <Container className={classes.cardContainer}>
-            <TextField
-              id="date"
-              label="Von"
-              type="date"
-              defaultValue="2021-09-14"
-              className={classes.textField}
-              InputLabelProps={{
-                shrink: true,
-              }}
-              onChange={(value) => {
-                handelSickDaysStart(value);
-              }}
-            />
+      {user?.role === "parent" && (
+        <Card className={classes.div}>
+          {/* //Verspätung */}
+          <CardContent className={classes.cardBackGround}>
+            <Typography variant="h5" className={classes.cardTyp}>
+              {" "}
+              Verspätung{" "}
+            </Typography>
+            <Container className={classes.cardContainer}>
+              <TextField
+                id="time"
+                label="Zeit"
+                type="time"
+                defaultValue="07:30"
+                InputLabelProps={{
+                  shrink: true,
+                }}
+                inputProps={{
+                  step: 300, // 5 min
+                }}
+                onChange={(value) => {
+                  handleTime(value);
+                }}
+              />
+              <Button
+                className={classes.cardBtn}
+                onClick={() => delayMorning()}
+              >
+                Absenden
+              </Button>
+            </Container>
+          </CardContent>
 
-            <TextField
-              id="date"
-              label="bis"
-              type="date"
-              defaultValue="2021-09-20"
-              className={classes.textField}
-              InputLabelProps={{
-                shrink: true,
-              }}
-              onChange={(value) => {
-                handelSickDaysEnd(value);
-              }}
-            />
-          </Container>
-          <Button
-            className={classes.cardBtnKM}
-            onClick={() => sickDaysStartEnd()}
-          >
-            Absenden
-          </Button>
-        </CardContent>
+          {/* //Krankenmledungen */}
+          <CardContent className={classes.cardBackGround}>
+            <Typography variant="h5" className={classes.cardTyp}>
+              Krankenmledungen
+            </Typography>
+            <Container className={classes.cardContainer}>
+              <TextField
+                id="date"
+                label="Von"
+                type="date"
+                defaultValue="2021-09-14"
+                className={classes.textField}
+                InputLabelProps={{
+                  shrink: true,
+                }}
+                onChange={(value) => {
+                  handelSickDaysStart(value);
+                }}
+              />
 
-        {/* //Verspätung Abolung*/}
-        <CardContent className={classes.cardBackGround}>
-          <Typography variant="h5" className={classes.cardTyp}>
-            {" "}
-            Verspätung Abholung
-          </Typography>
-          <Container className={classes.cardContainer}>
-            <TextField
-              id="time"
-              label="Zeit"
-              type="time"
-              defaultValue="07:30"
-              InputLabelProps={{
-                shrink: true,
-              }}
-              inputProps={{
-                step: 300, // 5 min
-              }}
-              onChange={(value) => {
-                handleTimeAfternoon(value);
-              }}
-            />
+              <TextField
+                id="date"
+                label="bis"
+                type="date"
+                defaultValue="2021-09-20"
+                className={classes.textField}
+                InputLabelProps={{
+                  shrink: true,
+                }}
+                onChange={(value) => {
+                  handelSickDaysEnd(value);
+                }}
+              />
+            </Container>
             <Button
-              className={classes.cardBtn}
-              onClick={() => delayAfternoon()}
+              className={classes.cardBtnKM}
+              onClick={() => sickDaysStartEnd()}
             >
               Absenden
             </Button>
-          </Container>
-        </CardContent>
-      </Card>
+          </CardContent>
+
+          {/* //Verspätung Abolung*/}
+          <CardContent className={classes.cardBackGround}>
+            <Typography variant="h5" className={classes.cardTyp}>
+              {" "}
+              Verspätung Abholung
+            </Typography>
+            <Container className={classes.cardContainer}>
+              <TextField
+                id="time"
+                label="Zeit"
+                type="time"
+                defaultValue="07:30"
+                InputLabelProps={{
+                  shrink: true,
+                }}
+                inputProps={{
+                  step: 300, // 5 min
+                }}
+                onChange={(value) => {
+                  handleTimeAfternoon(value);
+                }}
+              />
+              <Button
+                className={classes.cardBtn}
+                onClick={() => delayAfternoon()}
+              >
+                Absenden
+              </Button>
+            </Container>
+          </CardContent>
+        </Card>
+      )}
 
       {/* <List> */}
       {/* Verspätungs Liste */}
+      {user?.role === "pädagoge" && <>       
       {timing.map((item) => {
         return (
           <List className={classes.lists}>
             <ListItem className={classes.list1}>
-              <ListItemAvatar>
-                <Avatar></Avatar>
-              </ListItemAvatar>
               <ListItemText
                 primary={item.user?.name ?? user.name}
                 secondary={`Verspätung in der Früh ${item.time}`}
@@ -365,15 +384,13 @@ function Profile(props, navigation) {
             </ListItem>
           </List>
         );
-      })}
-      {/* Krankmeldung */}
+      })}</>  }
+         {/* Verspätungs Nachmittag */}
+      {user?.role === "pädagoge" && <>  
       {timingAfternoon.map((item) => {
         return (
           <List className={classes.lists}>
             <ListItem className={classes.list}>
-              <ListItemAvatar>
-                <Avatar></Avatar>
-              </ListItemAvatar>
               <ListItemText
                 primary={item.user?.name ?? user.name}
                 secondary={`Verspätung bei der Abholung ${item.timeAfternoon}`}
@@ -381,15 +398,13 @@ function Profile(props, navigation) {
             </ListItem>
           </List>
         );
-      })}
-      {/* Verspätungs Nachmittag */}
+      })}</> }
+         {/* Krankmeldung */}
+      {user?.role === "pädagoge" && <>  
       {sickDaysConfirm.map((item) => {
         return (
           <List className={classes.lists}>
             <ListItem className={classes.list}>
-              <ListItemAvatar>
-                <Avatar></Avatar>
-              </ListItemAvatar>
               <ListItemText
                 primary={item.user?.name ?? user.name}
                 secondary={`Krankmeldung von ${item.sickDaysStart} bis ${item.sickDaysEnd}`}
@@ -397,7 +412,7 @@ function Profile(props, navigation) {
             </ListItem>
           </List>
         );
-      })}
+      })}</> }
     </ScrollView>
   );
 }

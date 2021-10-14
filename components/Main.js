@@ -9,6 +9,7 @@ import {
   fetchUserFollowing,
   clearData,
 } from "../redux/actions/index";
+import {useUser} from '../hooks/Users';
 import firebase from "firebase/app";
 
 import FeedScreen from "./main/Feed";
@@ -39,6 +40,7 @@ const EmptyScreen = () => {
 };
 
 const Main = (props) => {
+  const user = useUser(firebase.auth().currentUser.uid);
   useEffect(() => {
     props.fetchUser();
     props.clearData();
@@ -65,7 +67,7 @@ const Main = (props) => {
           ),
         }}
       />
-      <Tab.Screen
+      {user?.role === "pädagoge" && <Tab.Screen
         name="AddContainer"
         component={AddStack}
         options={{
@@ -77,7 +79,7 @@ const Main = (props) => {
             ></MaterialCommunityIcons>
           ),
         }}
-      />
+      />}
       <Tab.Screen
         name="Profile"
         component={ProfileScreen}

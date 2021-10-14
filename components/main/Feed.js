@@ -29,12 +29,14 @@ const useStyles = makeStyles({
     marginTop: 20,
     marginLeft: 15,
     fontStyle: "bold",
+    color: "#708E7C"
   },
 });
 function Feed() {
   const classes = useStyles();
   const posts = useAllPosts();
   const users = useAllUsers();
+  const user = useUser(firebase.auth().currentUser.uid);
   
 
 
@@ -48,39 +50,17 @@ function Feed() {
           //wie heißt der user der post item gemacht hat?
           const postUserId = item.uid;
           const postUser = users.find((user) => user.uid === postUserId);
-          const a = firebase
-          .storage()
-          .ref('user')
-          .listAll()
-          .then(snap => {
-            snap.items.forEach(itemRef => {
-              itemRef.getDownloadURL().then(imgUrl => {
-                console.log(imgUrl)
-              });
-            })
-          })
           return (
             <View style={styles.containerImage}>
+               <Typography className={classes.text}>
+                  {postUser?.name ?? "User not found!"}
+                </Typography>
               <Image
                 style={styles.image}
                 key={item.downloadURL + `?${new Date()}`}
                 source={{ uri: item.downloadURL }}
               />
               <View style={styles.container}>
-                <Image
-                  source={{
-                    uri: a.photoURL,
-                  }}
-                  style={{
-                    margin: "10px",
-                    width: "60px",
-                    height: "60px",
-                  }}
-                />
-               
-                <Typography className={classes.text}>
-                  {postUser?.name ?? "User not found!"}
-                </Typography>
               </View>
               <Text style={styles.containerInfo}>{item.caption}</Text>
               <Divider />

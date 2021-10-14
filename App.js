@@ -94,9 +94,9 @@ const Appf = ({ navigation }) => {
             component={RegisterScreen}
             options={{
               headerStyle: {
-                backgroundColor: '#708E7C',
+                backgroundColor: "#708E7C",
               },
-              headerTintColor: 'white',
+              headerTintColor: "white",
             }}
           />
           <Stack.Screen
@@ -104,11 +104,9 @@ const Appf = ({ navigation }) => {
             component={LoginScreen}
             options={{
               headerStyle: {
-                backgroundColor: '#708E7C',
-                
+                backgroundColor: "#708E7C",
               },
-              headerTintColor: 'white',
-              
+              headerTintColor: "white",
             }}
           />
         </Stack.Navigator>
@@ -117,8 +115,7 @@ const Appf = ({ navigation }) => {
   }
   return (
     <Provider store={store}>
- 
-      <NavigationContainer>
+      {/* <NavigationContainer>
         <Stack.Navigator initalRouteName="Main">
           <Stack.Screen name="Kindergarten" component={MainScreen} />
           <Stack.Screen
@@ -132,42 +129,43 @@ const Appf = ({ navigation }) => {
             component={SaveScreen}
             navigation={navigation}
           />
-        </Stack.Navigator>
-      </NavigationContainer>
+        </Stack.Navigator> */}
+      {/* </NavigationContainer> */}
 
-     <NavigationContainer> 
-        <Drawer.Navigator initialRouteName="Profile" screenOptions={{
-          headerStyle: {
-            backgroundColor: '#708E7C',
-            color: 'white',
-            justifyContent: 'right'
-          },
-          headerTintColor: "white",
+      <NavigationContainer>
+        <Drawer.Navigator
+          initialRouteName="Profile"
+          screenOptions={{
+            headerStyle: {
+              backgroundColor: "#708E7C",
+              color: "white",
+              justifyContent: "right",
+            },
+            headerTintColor: "white",
 
-    drawerStyle: {
-      backgroundColor: '#708E7C',
-      width: 240,
-    
-    },
-    overlayColor: {
-      backgroundColor:'white',
-      opacity: 0.1,
-    },
-    drawerIcon: {
-      justifyContent: 'right'
-    },
-    drawerLabelStyle:{
-      color: 'white'
-    },
-    drawerPosition: 'right'
-  }} >
-          <Drawer.Screen name="Kindergarten" component={MainScreen} drawerStyle={{backgroundColor: 'black'}}/>
+            drawerStyle: {
+              backgroundColor: "#708E7C",
+              width: 240,
+            },
+            overlayColor: {
+              backgroundColor: "white",
+              opacity: 0.1,
+            },
+            drawerLabelStyle: {
+              color: "white",
+            },
+            drawerPosition: "left",
+          }}
+        >
+          <Drawer.Screen
+            name="Kindergarten"
+            component={MainScreen}
+            drawerStyle={{ backgroundColor: "black" }}
+          />
           <Drawer.Screen name="Chat" component={ChatScreen} />
-          <Drawer.Screen name="Calendar" component={CalenderScreen}/>
-        
-
+          <Drawer.Screen name="Calendar" component={CalenderScreen} />
         </Drawer.Navigator>
-      </NavigationContainer> *
+      </NavigationContainer>
     </Provider>
   );
 };

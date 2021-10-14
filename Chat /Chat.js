@@ -47,6 +47,7 @@ export default function Chat({navigation}) {
                       width: "100%",
                       flexDirection: "row",
                       justifyContent: "flex-start",
+                      
                      
                     }
                   : {
@@ -61,10 +62,10 @@ export default function Chat({navigation}) {
                   display: "flex",
                   alignItems: isIncoming ? "flex-start" : "flex-end",
                   flexDirection : "column",
-                  marginLeft : 20,
+                  marginLeft : 10,
                   marginRight : 20
               }}>
-                <Avatar src={photoURL} style={{marginTop : 20}}></Avatar>
+                
                 <Typography style={{marginTop : 10}} className={classes.message}>{text}</Typography>
                 <Typography style={{marginTop : 10}} className={classes.nameText}>{name}</Typography>
                 <Typography style={{marginTop : 10}} className={classes.role}>{role}</Typography>
